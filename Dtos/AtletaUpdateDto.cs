@@ -1,5 +1,3 @@
-namespace SobrasaApi.Dtos;
-
 public class AtletaUpdateDto
 {
     public int Id { get; set; }

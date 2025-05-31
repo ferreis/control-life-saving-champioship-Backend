@@ -15,21 +15,15 @@ public class EquipeService
         using var connection = new SqliteConnection(_connectionString);
         connection.Open();
 
-        var cmd = connection.CreateCommand();
-        cmd.CommandText = @"
+        var command = connection.CreateCommand();
+        command.CommandText = @"
             INSERT INTO Equipe (nome, tipo, estado, nacionalidade)
             VALUES ($nome, $tipo, $estado, $nacionalidade)";
-        cmd.Parameters.AddWithValue("$nome", equipe.Nome);
-        cmd.Parameters.AddWithValue("$tipo", equipe.Tipo);
-        cmd.Parameters.AddWithValue("$estado", equipe.Estado);
-        cmd.Parameters.AddWithValue("$nacionalidade", equipe.Nacionalidade);
-        cmd.ExecuteNonQuery();
-        // Recupera o ID da última linha inserida
-        using (var lastIdCmd = connection.CreateCommand())
-        {
-            lastIdCmd.CommandText = "SELECT last_insert_rowid()";
-            equipe.Id = Convert.ToInt32(lastIdCmd.ExecuteScalar());
-        }
+        command.Parameters.AddWithValue("$nome", equipe.Nome);
+        command.Parameters.AddWithValue("$tipo", equipe.Tipo);
+        command.Parameters.AddWithValue("$estado", equipe.Estado);
+        command.Parameters.AddWithValue("$nacionalidade", equipe.Nacionalidade);
+        command.ExecuteNonQuery();
     }
 
     public List<Equipe> Listar()
@@ -66,7 +60,7 @@ public class EquipeService
         cmd.ExecuteNonQuery();
     }
 
-    public void AtualizarParcial(int id, EquipeDto dto)
+    public void AtualizarParcial(int id, EquipeUpdateDto dto)
     {
         using var connection = new SqliteConnection(_connectionString);
         connection.Open();

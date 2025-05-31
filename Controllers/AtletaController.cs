@@ -20,6 +20,7 @@ public class AtletaController : BaseController<AtletaService>
         _service.Adicionar(atleta);
         return Created("", atleta);
     }
+    
     [HttpPatch]
     public IActionResult Atualizar([FromBody] AtletaUpdateDto atleta)
     {
