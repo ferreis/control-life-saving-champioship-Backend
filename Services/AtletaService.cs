@@ -10,67 +10,56 @@ public class AtletaService
     {
         _connectionString = connectionString;
     }
-    public AtletaComEquipeDto? ObterPorId(int id)
+
+    public Atleta ObterPorId(int id)
     {
         using var connection = new SqliteConnection(_connectionString);
         connection.Open();
 
         var command = connection.CreateCommand();
-        // Inclui JOIN com a tabela Pais para obter a nacionalidade
         command.CommandText =
-            @"SELECT a.id AS atleta_id, a.nome, a.cpf, a.genero, a.data_nascimento, a.pais_id,
-                     p.nacionalidade AS pais_nacionalidade
-              FROM Atleta a
-              INNER JOIN Pais p ON a.pais_id = p.id
-              WHERE a.id = $id";
+            "SELECT id, nome, cpf, genero, data_nascimento, pais_id FROM Atleta WHERE id = $id";
         command.Parameters.AddWithValue("$id", id);
 
         using var reader = command.ExecuteReader();
         if (reader.Read())
         {
-            return new AtletaComEquipeDto
+            return new Atleta
             {
-                AtletaId = reader.GetInt32(reader.GetOrdinal("atleta_id")),
+                Id = reader.GetInt32(reader.GetOrdinal("id")),
                 Nome = reader.GetString(reader.GetOrdinal("nome")),
                 Cpf = reader.GetString(reader.GetOrdinal("cpf")),
                 Genero = reader.GetString(reader.GetOrdinal("genero")),
                 DataNascimento = DateTime.Parse(reader.GetString(reader.GetOrdinal("data_nascimento"))),
-                PaisId = reader.GetInt32(reader.GetOrdinal("pais_id")), // Preenchendo o PaisId
-                Nacionalidade = reader.GetString(reader.GetOrdinal("pais_nacionalidade")) // Atribuindo a nacionalidade à propriedade PaisNome
+                PaisId = reader.GetInt32(reader.GetOrdinal("pais_id")),
             };
         }
 
         return null;
     }
 
-    // Convertido para retornar List<AtletaComEquipeDto> e incluir a nacionalidade do país
-    public List<AtletaComEquipeDto> Listar()
+    public List<Atleta> Listar()
     {
-        var atletas = new List<AtletaComEquipeDto>();
+        var atletas = new List<Atleta>();
 
         using var connection = new SqliteConnection(_connectionString);
         connection.Open();
 
         var command = connection.CreateCommand();
-        // Inclui JOIN com a tabela Pais para obter a nacionalidade
         command.CommandText =
-            @"SELECT a.id AS atleta_id, a.nome, a.cpf, a.genero, a.data_nascimento, a.pais_id,
-                     p.nacionalidade AS pais_nacionalidade
-              FROM Atleta a
-              INNER JOIN Pais p ON a.pais_id = p.id";
+            "SELECT id, nome, cpf, genero, data_nascimento, pais_id FROM Atleta";
 
         using var reader = command.ExecuteReader();
         while (reader.Read())
         {
-            atletas.Add(new AtletaComEquipeDto
+            atletas.Add(new Atleta
             {
-                AtletaId = reader.GetInt32(reader.GetOrdinal("atleta_id")),
+                Id = reader.GetInt32(reader.GetOrdinal("id")),
                 Nome = reader.GetString(reader.GetOrdinal("nome")),
                 Cpf = reader.GetString(reader.GetOrdinal("cpf")),
                 Genero = reader.GetString(reader.GetOrdinal("genero")),
                 DataNascimento = DateTime.Parse(reader.GetString(reader.GetOrdinal("data_nascimento"))),
-                PaisId = reader.GetInt32(reader.GetOrdinal("pais_id")), // Preenchendo o PaisId
-                Nacionalidade = reader.GetString(reader.GetOrdinal("pais_nacionalidade")) // Atribuindo a nacionalidade à propriedade PaisNome
+                PaisId = reader.GetInt32(reader.GetOrdinal("pais_id")),
             });
         }
 
@@ -156,20 +145,19 @@ public class AtletaService
                 a.cpf,
                 a.genero,
                 a.data_nascimento,
-                a.pais_id,
-                p.nacionalidade AS pais_nacionalidade,
+                p.nacionalidade AS pais_nacionalidade, -- Alias corrigido para a nacionalidade do país do atleta [cite: 1, 4]
                 e.nome AS equipe_nome,
                 e.tipo AS equipe_tipo,
-                s.nome AS equipe_estado_nome,
-                pe.nacionalidade AS equipe_nacionalidade_nome,
+                s.nome AS equipe_estado_nome, -- Adicionado JOIN para obter o nome do estado da equipe [cite: 5, 2]
+                pe.nacionalidade AS equipe_nacionalidade_nome, -- Adicionado JOIN para obter a nacionalidade do país da equipe [cite: 5, 1]
                 ae.ano_competicao
             FROM Atleta a
             INNER JOIN Pais p ON a.pais_id = p.id
             LEFT JOIN Atleta_Equipe ae ON a.id = ae.atleta_id
             LEFT JOIN Equipe e ON ae.equipe_id = e.id
-            LEFT JOIN Estado s ON e.estado_id = s.id
-            LEFT JOIN Pais pe ON e.pais_id = pe.id;
-        ";
+            LEFT JOIN Estado s ON e.estado_id = s.id -- JOIN para a tabela Estado [cite: 5, 2]
+            LEFT JOIN Pais pe ON e.pais_id = pe.id; -- JOIN para a tabela Pais (para o país da equipe) [cite: 5, 1]
+";
 
         using var reader = command.ExecuteReader();
         while (reader.Read())
@@ -181,13 +169,12 @@ public class AtletaService
                 Cpf = reader.GetString(reader.GetOrdinal("cpf")),
                 Genero = reader.GetString(reader.GetOrdinal("genero")),
                 DataNascimento = DateTime.Parse(reader.GetString(reader.GetOrdinal("data_nascimento"))),
-                PaisId = reader.GetInt32(reader.GetOrdinal("pais_id")),
                 Nacionalidade = reader.GetString(reader.GetOrdinal("pais_nacionalidade")),
 
                 EquipeNome = reader.IsDBNull(reader.GetOrdinal("equipe_nome")) ? null : reader.GetString(reader.GetOrdinal("equipe_nome")),
                 EquipeTipo = reader.IsDBNull(reader.GetOrdinal("equipe_tipo")) ? null : reader.GetString(reader.GetOrdinal("equipe_tipo")),
-                EquipeEstado = reader.IsDBNull(reader.GetOrdinal("equipe_estado_nome")) ? null : reader.GetString(reader.GetOrdinal("equipe_estado_nome")),
-                EquipeNacionalidade = reader.IsDBNull(reader.GetOrdinal("equipe_nacionalidade_nome")) ? null : reader.GetString(reader.GetOrdinal("equipe_nacionalidade_nome")),
+                EquipeEstado = reader.IsDBNull(reader.GetOrdinal("equipe_estado_nome")) ? null : reader.GetString(reader.GetOrdinal("equipe_estado_nome")), // Corrigido para usar o novo alias [cite: 2]
+                EquipeNacionalidade = reader.IsDBNull(reader.GetOrdinal("equipe_nacionalidade_nome")) ? null : reader.GetString(reader.GetOrdinal("equipe_nacionalidade_nome")), // Corrigido para usar o novo alias [cite: 1]
                 AnoCompeticao = reader.IsDBNull(reader.GetOrdinal("ano_competicao")) ? null : reader.GetInt32(reader.GetOrdinal("ano_competicao"))
             });
         }
