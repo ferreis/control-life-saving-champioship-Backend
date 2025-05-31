@@ -1,5 +1,3 @@
-namespace SobrasaApi.Dtos;
-
 public class AtletaUpdateDto
 {
     public int Id { get; set; }
@@ -7,5 +5,5 @@ public class AtletaUpdateDto
     public string? Cpf { get; set; }
     public string? Genero { get; set; }
     public DateTime? DataNascimento { get; set; }
-    public string? Nacionalidade { get; set; }
+    public int? PaisId { get; set; }
 }

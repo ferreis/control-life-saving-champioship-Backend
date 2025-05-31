@@ -8,30 +8,23 @@ public class EquipeController : BaseController<EquipeService>
     public IActionResult Get() => Ok(_service.Listar());
 
     [HttpPost]
-    public IActionResult Post([FromBody] EquipeDto dto)
+    public IActionResult Post([FromBody] Equipe equipe)
     {
-        var equipe = new Equipe
-        {
-            Nome = dto.Nome,
-            Tipo = dto.Tipo,
-            Estado = dto.Estado,
-            Nacionalidade = dto.Nacionalidade
-        };
         _service.Adicionar(equipe);
         return Created("", equipe);
+    }
+
+    [HttpPatch("{id}")]
+    public IActionResult Patch(int id, [FromBody] EquipeUpdateDto dto)
+    {
+        _service.Atualizar(id, dto);
+        return NoContent();
     }
 
     [HttpDelete("{id}")]
     public IActionResult Delete(int id)
     {
         _service.Deletar(id);
-        return NoContent();
-    }
-
-    [HttpPatch("{id}")]
-    public IActionResult Patch(int id, [FromBody] EquipeDto dto)
-    {
-        _service.AtualizarParcial(id, dto);
         return NoContent();
     }
 }

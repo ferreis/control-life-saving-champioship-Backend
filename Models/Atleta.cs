@@ -5,5 +5,5 @@ public class Atleta
     public string Cpf { get; set; }
     public string Genero { get; set; }
     public DateTime DataNascimento { get; set; }
-    public string Nacionalidade { get; set; }
+    public int PaisId { get; set; }
 }

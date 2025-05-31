@@ -1,5 +1,6 @@
-using Microsoft.Data.Sqlite;
+using System; // Necessário para DBNull.Value
 using System.Collections.Generic;
+using Microsoft.Data.Sqlite;
 
 public class EquipeService
 {
@@ -15,21 +16,17 @@ public class EquipeService
         using var connection = new SqliteConnection(_connectionString);
         connection.Open();
 
-        var cmd = connection.CreateCommand();
-        cmd.CommandText = @"
-            INSERT INTO Equipe (nome, tipo, estado, nacionalidade)
-            VALUES ($nome, $tipo, $estado, $nacionalidade)";
-        cmd.Parameters.AddWithValue("$nome", equipe.Nome);
-        cmd.Parameters.AddWithValue("$tipo", equipe.Tipo);
-        cmd.Parameters.AddWithValue("$estado", equipe.Estado);
-        cmd.Parameters.AddWithValue("$nacionalidade", equipe.Nacionalidade);
-        cmd.ExecuteNonQuery();
-        // Recupera o ID da última linha inserida
-        using (var lastIdCmd = connection.CreateCommand())
-        {
-            lastIdCmd.CommandText = "SELECT last_insert_rowid()";
-            equipe.Id = Convert.ToInt32(lastIdCmd.ExecuteScalar());
-        }
+        var command = connection.CreateCommand();
+        // Corrigido para usar estado_id e pais_id [cite: 5]
+        command.CommandText = @"
+            INSERT INTO Equipe (nome, tipo, estado_id, pais_id)
+            VALUES ($nome, $tipo, $estado_id, $pais_id)";
+        command.Parameters.AddWithValue("$nome", equipe.Nome);
+        command.Parameters.AddWithValue("$tipo", equipe.Tipo);
+        // Usar DBNull.Value para valores nulos de int?
+        command.Parameters.AddWithValue("$estado_id", (object?)equipe.EstadoId ?? DBNull.Value);
+        command.Parameters.AddWithValue("$pais_id", (object?)equipe.PaisId ?? DBNull.Value);
+        command.ExecuteNonQuery();
     }
 
     public List<Equipe> Listar()
@@ -38,18 +35,20 @@ public class EquipeService
         using var connection = new SqliteConnection(_connectionString);
         connection.Open();
 
-        var cmd = connection.CreateCommand();
-        cmd.CommandText = "SELECT id, nome, tipo, estado, nacionalidade FROM Equipe";
-        using var reader = cmd.ExecuteReader();
+        var command = connection.CreateCommand();
+        // Corrigido para selecionar estado_id e pais_id [cite: 5]
+        command.CommandText = "SELECT id, nome, tipo, estado_id, pais_id FROM Equipe";
+        using var reader = command.ExecuteReader();
         while (reader.Read())
         {
             equipes.Add(new Equipe
             {
-                Id = reader.GetInt32(0),
-                Nome = reader.GetString(1),
-                Tipo = reader.GetString(2),
-                Estado = reader.IsDBNull(3) ? null : reader.GetString(3),
-                Nacionalidade = reader.GetString(4)
+                Id = reader.GetInt32(reader.GetOrdinal("id")), // Usar GetOrdinal para robustez
+                Nome = reader.GetString(reader.GetOrdinal("nome")),
+                Tipo = reader.GetString(reader.GetOrdinal("tipo")),
+                // Usar GetOrdinal e IsDBNull para campos que podem ser nulos
+                EstadoId = reader.IsDBNull(reader.GetOrdinal("estado_id")) ? (int?)null : reader.GetInt32(reader.GetOrdinal("estado_id")),
+                PaisId = reader.IsDBNull(reader.GetOrdinal("pais_id")) ? (int?)null : reader.GetInt32(reader.GetOrdinal("pais_id"))
             });
         }
         return equipes;
@@ -60,30 +59,31 @@ public class EquipeService
         using var connection = new SqliteConnection(_connectionString);
         connection.Open();
 
-        var cmd = connection.CreateCommand();
-        cmd.CommandText = "DELETE FROM Equipe WHERE id = $id";
-        cmd.Parameters.AddWithValue("$id", id);
-        cmd.ExecuteNonQuery();
+        var command = connection.CreateCommand();
+        command.CommandText = "DELETE FROM Equipe WHERE id = $id";
+        command.Parameters.AddWithValue("$id", id);
+        command.ExecuteNonQuery();
     }
 
-    public void AtualizarParcial(int id, EquipeDto dto)
+    public void Atualizar(int id, EquipeUpdateDto dto)
     {
         using var connection = new SqliteConnection(_connectionString);
         connection.Open();
 
-        var cmd = connection.CreateCommand();
-        cmd.CommandText = @"
+        var command = connection.CreateCommand();
+        // Corrigido para atualizar estado_id e pais_id [cite: 5]
+        command.CommandText = @"
             UPDATE Equipe
             SET nome = COALESCE($nome, nome),
                 tipo = COALESCE($tipo, tipo),
-                estado = COALESCE($estado, estado),
-                nacionalidade = COALESCE($nacionalidade, nacionalidade)
+                estado_id = COALESCE($estado_id, estado_id),
+                pais_id = COALESCE($pais_id, pais_id)
             WHERE id = $id";
-        cmd.Parameters.AddWithValue("$id", id);
-        cmd.Parameters.AddWithValue("$nome", (object?)dto.Nome ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("$tipo", (object?)dto.Tipo ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("$estado", (object?)dto.Estado ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("$nacionalidade", (object?)dto.Nacionalidade ?? DBNull.Value);
-        cmd.ExecuteNonQuery();
+        command.Parameters.AddWithValue("$id", id);
+        command.Parameters.AddWithValue("$nome", (object?)dto.Nome ?? DBNull.Value);
+        command.Parameters.AddWithValue("$tipo", (object?)dto.Tipo ?? DBNull.Value);
+        command.Parameters.AddWithValue("$estado_id", (object?)dto.EstadoId ?? DBNull.Value); // Corrigido
+        command.Parameters.AddWithValue("$pais_id", (object?)dto.PaisId ?? DBNull.Value);       // Corrigido
+        command.ExecuteNonQuery();
     }
 }
