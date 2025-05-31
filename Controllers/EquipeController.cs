@@ -17,7 +17,7 @@ public class EquipeController : BaseController<EquipeService>
     [HttpPatch("{id}")]
     public IActionResult Patch(int id, [FromBody] EquipeUpdateDto dto)
     {
-        _service.AtualizarParcial(id, dto);
+        _service.Atualizar(id, dto);
         return NoContent();
     }
 

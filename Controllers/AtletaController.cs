@@ -30,7 +30,7 @@ public class AtletaController : BaseController<AtletaService>
         existente.Cpf = atleta.Cpf ?? existente.Cpf;
         existente.Genero = atleta.Genero ?? existente.Genero;
         existente.DataNascimento = atleta.DataNascimento ?? existente.DataNascimento;
-        existente.Nacionalidade = atleta.Nacionalidade ?? existente.Nacionalidade;
+        existente.PaisId = atleta.PaisId ?? existente.PaisId;
 
         _service.Atualizar(existente);
         return Ok(existente);
@@ -77,5 +77,4 @@ public class AtletaController : BaseController<AtletaService>
         var lista = _service.ListarComEquipes();
         return Ok(lista);
     }
-
 }
