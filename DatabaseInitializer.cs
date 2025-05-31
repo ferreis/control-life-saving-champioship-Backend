@@ -139,8 +139,8 @@ public static class DatabaseInitializer
             var insert = connection.CreateCommand();
             insert.CommandText = @"
                 -- 1. Inserir Países
-                INSERT INTO Pais (nome, nacionalidade) VALUES ('Brasil', 'Brasileira');
-                INSERT INTO Pais (nome, nacionalidade) VALUES ('Estados Unidos', 'Americana');
+                INSERT INTO Pais (nome, nacionalidade) VALUES ('Brasil', 'Brasileiro');
+                INSERT INTO Pais (nome, nacionalidade) VALUES ('Estados Unidos', 'Americano');
 
                 -- 2. Inserir Estados (vinculados aos Países)
                 INSERT INTO Estado (nome, sigla, pais_id) VALUES ('Santa Catarina', 'SC', (SELECT id FROM Pais WHERE nome = 'Brasil'));

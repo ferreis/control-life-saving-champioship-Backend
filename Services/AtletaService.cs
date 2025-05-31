@@ -169,8 +169,7 @@ public class AtletaService
                 Cpf = reader.GetString(reader.GetOrdinal("cpf")),
                 Genero = reader.GetString(reader.GetOrdinal("genero")),
                 DataNascimento = DateTime.Parse(reader.GetString(reader.GetOrdinal("data_nascimento"))),
-                PaisId = reader.GetInt32(reader.GetOrdinal("pais_id")), // Assumindo que você ainda precisa do PaisId do Atleta
-                PaisNome = reader.GetString(reader.GetOrdinal("pais_nacionalidade")), // Corrigido para usar o novo alias [cite: 1]
+                Nacionalidade = reader.GetString(reader.GetOrdinal("pais_nacionalidade")),
 
                 EquipeNome = reader.IsDBNull(reader.GetOrdinal("equipe_nome")) ? null : reader.GetString(reader.GetOrdinal("equipe_nome")),
                 EquipeTipo = reader.IsDBNull(reader.GetOrdinal("equipe_tipo")) ? null : reader.GetString(reader.GetOrdinal("equipe_tipo")),

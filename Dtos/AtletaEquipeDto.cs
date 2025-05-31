@@ -13,7 +13,7 @@ public class AtletaComEquipeDto
     public string Genero { get; set; }
     public DateTime DataNascimento { get; set; }
     public int PaisId { get; set; }
-    public string? PaisNome { get; set; }
+    public string? Nacionalidade { get; set; }
     public string? EquipeNome { get; set; }
     public string? EquipeTipo { get; set; }
     public string? EquipeEstado { get; set; }

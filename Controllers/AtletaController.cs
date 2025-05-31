@@ -9,7 +9,7 @@ public class AtletaController : BaseController<AtletaService>
     [HttpGet]
     public ActionResult<List<Atleta>> Get()
     {
-        return Ok(_service.Listar());
+        return Ok(_service.ListarComEquipes());
     }
 
     [HttpPost]
