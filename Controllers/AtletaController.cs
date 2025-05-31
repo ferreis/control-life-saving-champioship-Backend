@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,7 +16,7 @@ public class AtletaController : BaseController<AtletaService>
     public IActionResult Post([FromBody] Atleta atleta)
     {
         _service.Adicionar(atleta);
-        return Created("", atleta);
+        return Created($"api/atleta/{atleta.Id}", atleta);
     }
 
     [HttpPatch]
@@ -25,7 +26,6 @@ public class AtletaController : BaseController<AtletaService>
         if (existente == null)
             return NotFound();
 
-        // Atualiza apenas os campos enviados
         existente.Nome = atleta.Nome ?? existente.Nome;
         existente.Cpf = atleta.Cpf ?? existente.Cpf;
         existente.Genero = atleta.Genero ?? existente.Genero;
@@ -46,4 +46,36 @@ public class AtletaController : BaseController<AtletaService>
         _service.Deletar(atleta.Id);
         return NoContent();
     }
+
+    [HttpPost("vincular")]
+    public IActionResult Vincular([FromBody] AtletaEquipeDto dto)
+    {
+        try
+        {
+            if (dto.AtletaId == null || dto.EquipeId == null || dto.AnoCompeticao == null)
+                return BadRequest("Todos os campos devem ser preenchidos.");
+
+            var vinculo = new AtletaEquipe
+            {
+                AtletaId = dto.AtletaId.Value,
+                EquipeId = dto.EquipeId.Value,
+                AnoCompeticao = dto.AnoCompeticao.Value
+            };
+
+            _service.VincularAtletaEquipe(vinculo);
+            return Ok("Atleta vinculado à equipe com sucesso.");
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { erro = ex.Message });
+        }
+    }
+
+    [HttpGet("com-equipes")]
+    public IActionResult GetComEquipe()
+    {
+        var lista = _service.ListarComEquipes();
+        return Ok(lista);
+    }
+
 }

@@ -127,7 +127,7 @@ public class AtletaService
         command.ExecuteNonQuery();
     }
 
-    public void VincularAtletaEquipe(int atletaId, int equipeId, int ano)
+    public void VincularAtletaEquipe(AtletaEquipe atletaEquipe)
     {
         using var connection = new SqliteConnection(_connectionString);
         connection.Open();
@@ -137,9 +137,65 @@ public class AtletaService
             @"
         INSERT INTO Atleta_Equipe (atleta_id, equipe_id, ano_competicao)
         VALUES ($atletaId, $equipeId, $ano)";
-        command.Parameters.AddWithValue("$atletaId", atletaId);
-        command.Parameters.AddWithValue("$equipeId", equipeId);
-        command.Parameters.AddWithValue("$ano", ano);
+        command.Parameters.AddWithValue("$atletaId", atletaEquipe.AtletaId);
+        command.Parameters.AddWithValue("$equipeId", atletaEquipe.EquipeId);
+        command.Parameters.AddWithValue("$ano", atletaEquipe.AnoCompeticao);
         command.ExecuteNonQuery();
+
+        connection.Close();
     }
+
+    public List<AtletaComEquipeDto> ListarComEquipes()
+    {
+        var lista = new List<AtletaComEquipeDto>();
+
+        using var connection = new SqliteConnection(_connectionString);
+        connection.Open();
+
+        var command = connection.CreateCommand();
+        command.CommandText = @"
+        SELECT 
+            a.id AS atleta_id,
+            a.nome,
+            a.cpf,
+            a.genero,
+            a.data_nascimento,
+            a.nacionalidade,
+            e.nome AS equipe_nome,
+            e.tipo AS equipe_tipo,
+            e.estado AS equipe_estado,
+            e.nacionalidade AS equipe_nacionalidade,
+            ae.ano_competicao
+        FROM Atleta a
+        INNER JOIN Atleta_Equipe ae ON a.id = ae.atleta_id
+        INNER JOIN Equipe e ON ae.equipe_id = e.id";
+
+        using var reader = command.ExecuteReader();
+        while (reader.Read())
+        {
+            lista.Add(
+                new AtletaComEquipeDto
+                {
+                    AtletaId = reader.GetInt32(reader.GetOrdinal("atleta_id")),
+                    Nome = reader.GetString(reader.GetOrdinal("nome")),
+                    Cpf = reader.GetString(reader.GetOrdinal("cpf")),
+                    Genero = reader.GetString(reader.GetOrdinal("genero")),
+                    DataNascimento = DateTime.Parse(
+                        reader.GetString(reader.GetOrdinal("data_nascimento"))
+                    ),
+                    Nacionalidade = reader.GetString(reader.GetOrdinal("nacionalidade")),
+                    EquipeNome = reader.GetString(reader.GetOrdinal("equipe_nome")),
+                    EquipeTipo = reader.GetString(reader.GetOrdinal("equipe_tipo")),
+                    EquipeEstado = reader.GetString(reader.GetOrdinal("equipe_estado")),
+                    EquipeNacionalidade = reader.GetString(
+                        reader.GetOrdinal("equipe_nacionalidade")
+                    ),
+                    AnoCompeticao = reader.GetInt32(reader.GetOrdinal("ano_competicao")),
+                }
+            );
+        }
+
+        return lista;
+    }
+
 }
