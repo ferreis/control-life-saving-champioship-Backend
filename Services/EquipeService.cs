@@ -32,9 +32,9 @@ public class EquipeService
         using var connection = new SqliteConnection(_connectionString);
         connection.Open();
 
-        var cmd = connection.CreateCommand();
-        cmd.CommandText = "SELECT id, nome, tipo, estado, nacionalidade FROM Equipe";
-        using var reader = cmd.ExecuteReader();
+        var command = connection.CreateCommand();
+        command.CommandText = "SELECT id, nome, tipo, estado, nacionalidade FROM Equipe";
+        using var reader = command.ExecuteReader();
         while (reader.Read())
         {
             equipes.Add(new Equipe
@@ -54,10 +54,10 @@ public class EquipeService
         using var connection = new SqliteConnection(_connectionString);
         connection.Open();
 
-        var cmd = connection.CreateCommand();
-        cmd.CommandText = "DELETE FROM Equipe WHERE id = $id";
-        cmd.Parameters.AddWithValue("$id", id);
-        cmd.ExecuteNonQuery();
+        var command = connection.CreateCommand();
+        command.CommandText = "DELETE FROM Equipe WHERE id = $id";
+        command.Parameters.AddWithValue("$id", id);
+        command.ExecuteNonQuery();
     }
 
     public void AtualizarParcial(int id, EquipeUpdateDto dto)
@@ -65,19 +65,19 @@ public class EquipeService
         using var connection = new SqliteConnection(_connectionString);
         connection.Open();
 
-        var cmd = connection.CreateCommand();
-        cmd.CommandText = @"
+        var command = connection.CreateCommand();
+        command.CommandText = @"
             UPDATE Equipe
             SET nome = COALESCE($nome, nome),
                 tipo = COALESCE($tipo, tipo),
                 estado = COALESCE($estado, estado),
                 nacionalidade = COALESCE($nacionalidade, nacionalidade)
             WHERE id = $id";
-        cmd.Parameters.AddWithValue("$id", id);
-        cmd.Parameters.AddWithValue("$nome", (object?)dto.Nome ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("$tipo", (object?)dto.Tipo ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("$estado", (object?)dto.Estado ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("$nacionalidade", (object?)dto.Nacionalidade ?? DBNull.Value);
-        cmd.ExecuteNonQuery();
+        command.Parameters.AddWithValue("$id", id);
+        command.Parameters.AddWithValue("$nome", (object?)dto.Nome ?? DBNull.Value);
+        command.Parameters.AddWithValue("$tipo", (object?)dto.Tipo ?? DBNull.Value);
+        command.Parameters.AddWithValue("$estado", (object?)dto.Estado ?? DBNull.Value);
+        command.Parameters.AddWithValue("$nacionalidade", (object?)dto.Nacionalidade ?? DBNull.Value);
+        command.ExecuteNonQuery();
     }
 }

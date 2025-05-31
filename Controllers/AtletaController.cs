@@ -1,13 +1,10 @@
-using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
-using SobrasaApi.Dtos;
-
+using Microsoft.AspNetCore.Mvc;
 
 [ApiController]
 [Route("api/[controller]")]
 public class AtletaController : BaseController<AtletaService>
 {
-
     [HttpGet]
     public ActionResult<List<Atleta>> Get()
     {
@@ -20,7 +17,7 @@ public class AtletaController : BaseController<AtletaService>
         _service.Adicionar(atleta);
         return Created("", atleta);
     }
-    
+
     [HttpPatch]
     public IActionResult Atualizar([FromBody] AtletaUpdateDto atleta)
     {
@@ -38,6 +35,7 @@ public class AtletaController : BaseController<AtletaService>
         _service.Atualizar(existente);
         return Ok(existente);
     }
+
     [HttpDelete("{id}")]
     public IActionResult Delete(int id)
     {
@@ -48,5 +46,4 @@ public class AtletaController : BaseController<AtletaService>
         _service.Deletar(atleta.Id);
         return NoContent();
     }
-
 }
