@@ -1,4 +1,3 @@
-// Dtos/CompeticaoDto.cs
 using System;
 using System.ComponentModel.DataAnnotations;
 

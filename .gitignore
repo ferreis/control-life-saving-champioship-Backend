@@ -24,4 +24,4 @@ TestResults/
 
 # Arquivos específicos do sistema operacional (se você ou seu colega usarem)
 .DS_Store # macOS
-Thumbs.db # Windows
+Thumbs.db # Windows
